@@ -8,20 +8,25 @@ while True:
         print("You have not entered valid port number. Please try again.")
 
 server_socket = socket(AF_INET, SOCK_DGRAM)
-server_socket.bind(('' , server_port))
+server_socket.bind(("", server_port))
 
-print(f"Listening on port: {server_port}")
+print(f"\nListening on port: {server_port}")
 
-while True:
-    data, client = server_socket.recvfrom(2048)
-    message = data.decode()
+try:
+    while True:
+        data, client = server_socket.recvfrom(2048)
+        message = data.decode()
 
-    print(f"Received message from [{client[0]}:{client[1]}]: {message}")
+        print(f"Received message from [{client[0]}:{client[1]}]: {message}")
 
-    if message.isdigit():
-        number = int(message)
-        response = "The number you've entered is even.\n" if number % 2 == 0 else "The number you've entered is odd.\n"
-    else:
-        response = "You have not entered a number. Please try again.\n"
+        if message.isdigit():
+            number = int(message)
+            response = "The number you've entered is even.\n" if number % 2 == 0 else "The number you've entered is odd.\n"
+        else:
+            response = "You have not entered a number. Please try again.\n"
 
-    server_socket.sendto(response.encode(), client)
+        server_socket.sendto(response.encode(), client)
+except KeyboardInterrupt:
+    print("\nStopping server...")
+finally:
+    server_socket.close()
