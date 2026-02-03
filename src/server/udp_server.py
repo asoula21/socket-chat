@@ -15,4 +15,7 @@ print(f"Listening on port: {server_port}")
 while True:
     data, client = server_socket.recvfrom(2048)
     message = data.decode()
+
+    print(f"Received message from [{client[0]}:{client[1]}]: {message}")
+
     server_socket.sendto(message.encode(), client)
