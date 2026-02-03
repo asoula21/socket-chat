@@ -15,7 +15,7 @@ def get_server_port() -> int:
             # Ports below 1024 are usually reserved for the OS
             if 1024 <= port <= 65535:
                 return port
-            print("Port must be between 1 and 65535. Please try again.\n")
+            print("Port must be between 1024 and 65535. Please try again.\n")
         except ValueError:
             print("You have not entered a valid port number. Please try again.\n")
 
