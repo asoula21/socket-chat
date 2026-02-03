@@ -1,5 +1,5 @@
 import logging
-from socket import *
+from socket import socket, AF_INET, SOCK_DGRAM
 
 logging.basicConfig(
     level=logging.INFO,
