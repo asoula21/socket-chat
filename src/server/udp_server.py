@@ -1,4 +1,5 @@
 import logging
+import netifaces
 from socket import socket, AF_INET, SOCK_DGRAM
 
 logging.basicConfig(
@@ -38,7 +39,10 @@ def main():
     server_socket = socket(AF_INET, SOCK_DGRAM)
     server_socket.bind(("", server_port))
 
-    logger.info("Server listening on port: %d", server_port)
+    # Get the interface IP address
+    server_ip = netifaces.ifaddresses('en0')[netifaces.AF_INET][0]['addr']
+
+    logger.info("Server %s listening on port: %d", server_ip, server_port)
 
     try:
         while True:
