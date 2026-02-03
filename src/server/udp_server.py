@@ -43,7 +43,12 @@ def main():
     try:
         while True:
             data, client = server_socket.recvfrom(BUFFER_SIZE)
-            message = data.decode()
+
+            try:
+                message = data.decode().strip()
+            except UnicodeDecodeError:
+                logger.warning("Received malformed data from [%s:%d], ignoring.", *client)
+                continue
 
             logger.info("Received message from [%s:%d]: %s", *client, message)
 
