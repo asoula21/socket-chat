@@ -1,11 +1,16 @@
 from socket import *
 
-server_port = 25535
-server_socket = socket(AF_INET, SOCK_DGRAM)
+while True:
+    try:
+        server_port = int(input("Enter your server port: "))
+        break
+    except ValueError:
+        print("You have not entered valid port number. Please try again.")
 
+server_socket = socket(AF_INET, SOCK_DGRAM)
 server_socket.bind(('' , server_port))
 
-print("Waiting...")
+print(f"Listening on port: {server_port}")
 
 while True:
     data, client = server_socket.recvfrom(2048)
