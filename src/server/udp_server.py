@@ -1,5 +1,12 @@
+import logging
 from socket import *
-from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 def get_server_port() -> int:
     while True:
@@ -29,29 +36,28 @@ def main():
     server_socket = socket(AF_INET, SOCK_DGRAM)
     server_socket.bind(("", server_port))
 
-    print(f"\nServer listening on port: {server_port}\n")
+    logger.info("Server listening on port: %d", server_port)
 
     try:
         while True:
             data, client = server_socket.recvfrom(2048)
             message = data.decode()
-            timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            print(f"{timestamp} | Received message from [{client[0]}:{client[1]}]: {message}")
+
+            logger.info("Received message from [%s:%d]: %s", *client, message)
 
             response, should_shutdown = process_message(message)
 
             if should_shutdown:
-                print("\nReceived stop command. Shutting down server...")
+                logger.info("Received stop command. Shutting down server...")
 
             server_socket.sendto(response.encode(), client)
 
             if should_shutdown:
                 break
     except KeyboardInterrupt:
-        print("\nStopping server...")
+        logger.info("Stopping server...")
     finally:
         server_socket.close()
-
 
 if __name__ == "__main__":
     main()
