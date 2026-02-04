@@ -1,6 +1,7 @@
 import logging
-import netifaces
 from socket import socket, AF_INET, SOCK_DGRAM
+
+BUFFER_SIZE = 2048
 
 logging.basicConfig(
     level=logging.INFO,
@@ -8,8 +9,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-BUFFER_SIZE = 2048
 
 def get_server_port() -> int:
     """Gets a user-defined port value between 1024 and 65535."""
@@ -42,17 +41,14 @@ def main():
     server_socket = socket(AF_INET, SOCK_DGRAM)
     server_socket.bind(("", server_port))
 
-    # Get the interface IP address
-    server_ip = netifaces.ifaddresses('en0')[netifaces.AF_INET][0]['addr']
-
-    logger.info("Server %s listening on port: %d", server_ip, server_port)
+    logger.info("Server listening on 0.0.0.0:%d", server_port)
 
     try:
         while True:
             data, client = server_socket.recvfrom(BUFFER_SIZE)
 
             try:
-                message = data.decode().strip()
+                message = data.decode("utf-8").strip()
             except UnicodeDecodeError:
                 logger.warning("Received malformed data from [%s:%d], ignoring.", *client)
                 continue
@@ -60,12 +56,18 @@ def main():
             logger.info("Received message from [%s:%d]: %s", *client, message)
 
             response, should_shutdown = process_message(message)
-            server_socket.sendto(response.encode(), client)
+
+            try:
+                server_socket.sendto(response.encode("utf-8"), client)
+            except OSError as e:
+                logger.error("Failed to send response to [%s:%d]: %s", *client, e)
+                if should_shutdown:
+                    break
+                continue
 
             if should_shutdown:
                 logger.warning("Received stop command. Shutting down server.")
                 break
-
     except KeyboardInterrupt:
         logger.warning("Stopping server...")
     finally:

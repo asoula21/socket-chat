@@ -1,6 +1,8 @@
 import logging
 import ipaddress
-from socket import socket, AF_INET, SOCK_DGRAM
+from socket import socket, timeout, AF_INET, SOCK_DGRAM
+
+BUFFER_SIZE = 2048
 
 logging.basicConfig(
     level=logging.INFO,
@@ -8,8 +10,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-BUFFER_SIZE = 2048
 
 def get_server_info() -> tuple[str, int]:
     """Gets the server IPv4 and port from the user."""
@@ -38,6 +38,8 @@ def get_server_info() -> tuple[str, int]:
 def main():
     server_ip, server_port = get_server_info()
     client_socket = socket(AF_INET, SOCK_DGRAM)
+    # Add a 5-second timeout if we can't reach the server
+    client_socket.settimeout(5.0)
 
     print("\nEnter a number to check if it's even or odd.")
     print("Enter 'stop' to shut down the server and client.")
@@ -50,15 +52,30 @@ def main():
             if not message:
                 continue
 
-            client_socket.sendto(message.encode(), (server_ip, server_port))
-            data, server = client_socket.recvfrom(BUFFER_SIZE)
+            if len(message.encode()) > BUFFER_SIZE:
+                print("Your input was too long. Please try again.")
+                continue
 
-            print(data.decode())
+            try:
+                client_socket.sendto(message.encode("utf-8"), (server_ip, server_port))
+                data, server = client_socket.recvfrom(BUFFER_SIZE)
 
-            if message.lower().strip() == "stop":
-                logger.warning("The server has stopped. The client will also stop running.")
+                if server != (server_ip, server_port):
+                    logger.warning(f"Unexpected response from {server}, ignoring.")
+                    continue
+
+                print(data.decode("utf-8"))
+
+                if message.lower().strip() == "stop":
+                    logger.warning("The server has stopped. The client will also stop running.")
+                    break
+            except timeout:
+                logger.error("Server did not respond. (timeout)")
+            except UnicodeDecodeError:
+                logger.error("Received malformed data from server, ignoring.")
+            except OSError as e:
+                logger.error(f"Socket error: {e}")
                 break
-
     except KeyboardInterrupt:
         logger.warning("Stopping client...")
     finally:
