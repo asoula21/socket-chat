@@ -4,7 +4,7 @@ from socket import socket, AF_INET, SOCK_DGRAM
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
+    format="\n%(asctime)s | %(levelname)s | %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
@@ -21,6 +21,8 @@ def get_server_info() -> tuple[str, int]:
             break
         except ValueError:
             print("Invalid IPv4 address format. Please enter a valid IPv4 address.\n")
+        except KeyboardInterrupt:
+            quit()
 
     while True:
         try:
@@ -30,26 +32,35 @@ def get_server_info() -> tuple[str, int]:
             print("Port must be between 1024 and 65535. Please try again.\n")
         except ValueError:
             print("You have not entered a valid port number. Please try again.\n")
+        except KeyboardInterrupt:
+            quit()
 
 def main():
     server_ip, server_port = get_server_info()
     client_socket = socket(AF_INET, SOCK_DGRAM)
 
+    print("\nEnter a number to check if it's even or odd.")
+    print("Enter 'stop' to shut down the server and client.")
+    print("Press Ctrl+C to exit the client.\n")
+
     try:
         while True:
             message = input("\nEnter a number: ")
+
+            if not message:
+                continue
 
             client_socket.sendto(message.encode(), (server_ip, server_port))
             data, server = client_socket.recvfrom(BUFFER_SIZE)
 
             print(data.decode())
 
-            if message == "stop":
+            if message.lower().strip() == "stop":
                 logger.warning("The server has stopped. The client will also stop running.")
                 break
 
     except KeyboardInterrupt:
-        logger.warning("\nStopping client...")
+        logger.warning("Stopping client...")
     finally:
         client_socket.close()
 

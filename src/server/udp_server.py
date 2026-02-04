@@ -22,6 +22,8 @@ def get_server_port() -> int:
             print("Port must be between 1024 and 65535. Please try again.\n")
         except ValueError:
             print("You have not entered a valid port number. Please try again.\n")
+        except KeyboardInterrupt:
+            quit()
 
 def process_message(message: str) -> tuple[str, bool]:
     """Returns (response, should_shutdown)."""
