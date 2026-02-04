@@ -1,6 +1,6 @@
-import logging
 import ipaddress
-from socket import socket, timeout, AF_INET, SOCK_DGRAM
+import logging
+from socket import AF_INET, SOCK_DGRAM, socket, timeout
 
 BUFFER_SIZE = 2048
 
