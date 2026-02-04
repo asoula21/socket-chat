@@ -10,6 +10,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def get_server_port() -> int:
     """Gets a user-defined port value between 1024 and 65535."""
     while True:
@@ -24,6 +25,7 @@ def get_server_port() -> int:
         except KeyboardInterrupt:
             quit()
 
+
 def process_message(message: str) -> tuple[str, bool]:
     """Returns (response, should_shutdown)."""
     if message.lower() == "stop":
@@ -35,6 +37,7 @@ def process_message(message: str) -> tuple[str, bool]:
         return f"The number you entered is {parity}.", False
     except ValueError:
         return "You have not entered a number. Please try again.", False
+
 
 def main():
     server_port = get_server_port()
@@ -50,7 +53,9 @@ def main():
             try:
                 message = data.decode("utf-8").strip()
             except UnicodeDecodeError:
-                logger.warning("Received malformed data from [%s:%d], ignoring.", *client)
+                logger.warning(
+                    "Received malformed data from [%s:%d], ignoring.", *client
+                )
                 continue
 
             logger.info("Received message from [%s:%d]: %s", *client, message)
@@ -72,6 +77,7 @@ def main():
         logger.warning("Stopping server...")
     finally:
         server_socket.close()
+
 
 if __name__ == "__main__":
     main()

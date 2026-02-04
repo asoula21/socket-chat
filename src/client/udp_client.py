@@ -11,6 +11,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def get_server_info() -> tuple[str, int]:
     """Gets the server IPv4 and port from the user."""
     while True:
@@ -34,6 +35,7 @@ def get_server_info() -> tuple[str, int]:
             print("You have not entered a valid port number. Please try again.\n")
         except KeyboardInterrupt:
             quit()
+
 
 def main():
     server_ip, server_port = get_server_info()
@@ -67,7 +69,9 @@ def main():
                 print(data.decode("utf-8"))
 
                 if message.lower().strip() == "stop":
-                    logger.warning("The server has stopped. The client will also stop running.")
+                    logger.warning(
+                        "The server has stopped. The client will also stop running."
+                    )
                     break
             except timeout:
                 logger.error("Server did not respond. (timeout)")
@@ -80,6 +84,7 @@ def main():
         logger.warning("Stopping client...")
     finally:
         client_socket.close()
+
 
 if __name__ == "__main__":
     main()
