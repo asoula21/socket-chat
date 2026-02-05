@@ -55,6 +55,10 @@ def main():
                 continue
 
             if len(message.encode()) > BUFFER_SIZE:
+                logger.warning(
+                    f"Message length: %d, expected {BUFFER_SIZE}.",
+                    len(message.encode()),
+                )
                 print("Your input was too long. Please try again.")
                 continue
 
