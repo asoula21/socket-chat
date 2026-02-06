@@ -51,7 +51,7 @@ def main():
     try:
         logger.info("Connecting to server at %s:%d...", server_ip, server_port)
         client_socket.connect((server_ip, server_port))
-        logger.info("Successfully connected to server!")
+        print("Successfully connected to server!")
     except timeout:
         logger.error("Connection timeout. Server is not reachable.")
         client_socket.close()
@@ -71,21 +71,17 @@ def main():
 
     try:
         while True:
-            try:
-                message = input("Enter a number: ").strip()
-            except EOFError:
-                break
+            message = input("Enter a number: ")
 
             if not message:
                 continue
 
             if len(message.encode()) > BUFFER_SIZE:
                 logger.warning(
-                    "Message length: %d bytes, maximum allowed: %d bytes.",
+                    f"Message length: %d, expected {BUFFER_SIZE}.",
                     len(message.encode()),
-                    BUFFER_SIZE,
                 )
-                print("Your input was too long. Please try again.\n")
+                print("Your input was too long. Please try again.")
                 continue
 
             try:
@@ -101,7 +97,7 @@ def main():
                     break
 
                 response = data.decode("utf-8")
-                print(f"\nServer response: {response}")
+                print(f"{response}\n")
 
                 # Check if we sent stop command
                 if message.lower() == "stop":
@@ -132,7 +128,6 @@ def main():
         logger.warning("\nStopping client...")
     finally:
         client_socket.close()
-        logger.info("Client socket closed. TCP connection terminated.")
 
 
 if __name__ == "__main__":
