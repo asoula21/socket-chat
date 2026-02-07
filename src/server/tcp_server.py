@@ -2,16 +2,17 @@ from socket import AF_INET, SO_REUSEADDR, SOCK_STREAM, SOL_SOCKET, socket
 
 from src.server.common import (
     BUFFER_SIZE,
-    MAX_CONNECTIONS,
+    config_port,
     logger,
     process_message,
-    set_port,
     stop_server,
 )
 
+MAX_CONNECTIONS = 1
+
 
 def main():
-    server_port = set_port()
+    server_port = config_port()
 
     server_socket = socket(AF_INET, SOCK_STREAM)
     server_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)

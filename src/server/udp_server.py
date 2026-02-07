@@ -2,15 +2,15 @@ from socket import AF_INET, SOCK_DGRAM, socket
 
 from src.server.common import (
     BUFFER_SIZE,
+    config_port,
     logger,
     process_message,
-    set_port,
     stop_server,
 )
 
 
 def main():
-    server_port = set_port()
+    server_port = config_port()
 
     server_socket = socket(AF_INET, SOCK_DGRAM)
     server_socket.bind(("", server_port))
