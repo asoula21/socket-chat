@@ -1,68 +1,63 @@
-import logging
-import sys
 from socket import AF_INET, SOCK_DGRAM, socket
 
-from src.utils.message import BUFFER_SIZE, process
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S",
+from src.server.common import (
+    BUFFER_SIZE,
+    logger,
+    process_message,
+    set_port,
+    stop_server,
 )
-logger = logging.getLogger(__name__)
-
-
-def get_server_port() -> int:
-    """Gets a user-defined port value between 1024 and 65535."""
-    while True:
-        try:
-            port = int(input("Enter your server port: "))
-            # Ports below 1024 are usually reserved for the OS
-            if 1024 <= port <= 65535:
-                return port
-            print("Port must be between 1024 and 65535. Please try again.\n")
-        except ValueError:
-            print("You have not entered a valid port number. Please try again.\n")
-        except KeyboardInterrupt:
-            sys.exit(0)
 
 
 def main():
-    server_port = get_server_port()
+    server_port = set_port()
+
     server_socket = socket(AF_INET, SOCK_DGRAM)
     server_socket.bind(("", server_port))
 
     logger.info("Server listening on 0.0.0.0:%d", server_port)
 
     try:
-        while True:
+        shutdown = False
+        while not shutdown:
             data, client = server_socket.recvfrom(BUFFER_SIZE)
 
             try:
-                message = data.decode("utf-8").strip()
-            except UnicodeDecodeError:
-                logger.warning(
-                    "Received malformed data from [%s:%d], ignoring.", *client
-                )
-                continue
+                if len(data) > BUFFER_SIZE:
+                    logger.warning(
+                        "Received message length: %d, expected %d.",
+                        len(data),
+                        BUFFER_SIZE,
+                    )
+                    response = "Message too long. Please send a shorter message."
+                    server_socket.sendto(response.encode("utf-8"), client)
+                    continue
 
-            logger.info("Received message from [%s:%d]: %s", *client, message)
+                try:
+                    message = data.decode("utf-8").strip()
+                except UnicodeDecodeError:
+                    logger.warning(
+                        "Received invalid message from [%s:%d]: %s", *client, data
+                    )
+                    response = "Invalid message format. Please send a valid UTF-8 encoded string."
+                    server_socket.sendto(response.encode("utf-8"), client)
+                    continue
 
-            response, should_shutdown = process(message)
+                logger.info("Received message from [%s:%d]: %s", *client, message)
 
-            try:
+                response = process_message(message)
                 server_socket.sendto(response.encode("utf-8"), client)
-            except OSError as e:
-                logger.error("Failed to send response to [%s:%d]: %s", *client, e)
-                if should_shutdown:
-                    break
-                continue
+                logger.info("Sent response to [%s:%d]: %s", *client, response)
 
-            if should_shutdown:
-                logger.warning("Received stop command. Shutting down server.")
-                break
+                if stop_server(message):
+                    logger.warning("Received stop command. Shutting down server...")
+                    shutdown = True
+            except Exception as e:
+                logger.error("Error processing message from [%s:%d]: %s", *client, e)
     except KeyboardInterrupt:
-        logger.warning("Stopping server...")
+        logger.warning("\nStopping server...")
+    except Exception as e:
+        logger.error("Server error: %s", e)
     finally:
         server_socket.close()
 
