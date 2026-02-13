@@ -1,6 +1,6 @@
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
 
-from src.client.common import BUFFER_SIZE, MESSAGE, TIMEOUT, config_server
+from src.client.common import BUFFER_SIZE, MESSAGE, TIMEOUT, config_server, stop_server
 
 
 def main():
@@ -17,6 +17,10 @@ def main():
 
                 if not message:
                     continue
+
+                if stop_server(message):
+                    print("\nStopping client...")
+                    break
 
                 encoded = message.encode("utf-8")
                 if len(encoded) > BUFFER_SIZE:

@@ -43,3 +43,7 @@ def config_server() -> tuple[str, int]:
     except KeyboardInterrupt:
         print("\nClient setup cancelled.")
         sys.exit()
+
+
+def stop_server(message: str) -> bool:
+    return message.strip().lower() == "stop"
