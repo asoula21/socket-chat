@@ -47,7 +47,7 @@ def main():
                         "Error processing message from [%s:%d]: %s", *client, e
                     )
         except KeyboardInterrupt:
-            logger.warning("\nStopping server...")
+            logger.warning("Stopping server...")
         except Exception as e:
             logger.error("Server error: %s", e)
 
