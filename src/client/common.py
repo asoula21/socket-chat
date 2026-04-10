@@ -1,11 +1,13 @@
 import ipaddress
 import sys
+from pathlib import Path
 
 BUFFER_SIZE = 1024
 TIMEOUT = 5.0
 
 DEFAULT_IP = "127.0.0.1"
 DEFAULT_PORT = 25535
+CERTS_DIR = Path(__file__).resolve().parent.parent / "certs"
 
 MESSAGE = (
     "\nEnter a number to check if it's even or odd.\n"

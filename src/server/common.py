@@ -1,8 +1,10 @@
 import logging
 import sys
+from pathlib import Path
 
 BUFFER_SIZE = 1024
 DEFAULT_PORT = 25535
+CERTS_DIR = Path(__file__).resolve().parent.parent / "certs"
 
 logging.basicConfig(
     level=logging.DEBUG,
